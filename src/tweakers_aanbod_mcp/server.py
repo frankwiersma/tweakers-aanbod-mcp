@@ -3,10 +3,13 @@
 import logging
 from typing import Annotated
 
+import anyio
 import httpx
-from mcp.server.fastmcp import FastMCP
-from mcp.server.fastmcp.exceptions import ToolError
-from mcp.types import ToolAnnotations
+from mcp.server import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
+from mcp.server.runner import serve_loop
+from mcp.server.stdio import stdio_server
+from mcp_types import ToolAnnotations
 from pydantic import Field
 
 from tweakers_aanbod_mcp.client import RateLimitedError, TweakersClient
@@ -14,7 +17,7 @@ from tweakers_aanbod_mcp.models import Category, Listing, SearchResult
 from tweakers_aanbod_mcp.parsing import ParseError, parse_categories, parse_listing, parse_search_page
 from tweakers_aanbod_mcp.query import Condition, SellerType, Sort, search_params
 
-mcp = FastMCP(
+mcp = MCPServer(
     "tweakers-aanbod",
     instructions=(
         "Search second-hand listings on Tweakers Vraag & Aanbod (tweakers.net/aanbod). "
@@ -117,6 +120,22 @@ async def get_listing(
         raise ToolError(f"{exc} ({url})") from exc
 
 
+async def _serve_stdio() -> None:
+    # Claude Code opens with a 2026-07-28 `server/discover` probe and then sends the 2025 `initialize`
+    # handshake on the same connection. MCPServer.run() locks a connection to the era of its first
+    # request and refuses that handshake (-32022), so serve the handshake era: the probe gets an
+    # error and the client carries on with `initialize`.
+    server = mcp._lowlevel_server
+    async with stdio_server() as (read_stream, write_stream), server.lifespan(server) as lifespan_state:
+        await serve_loop(
+            server,
+            read_stream,
+            write_stream,
+            lifespan_state=lifespan_state,
+            init_options=server.create_initialization_options(),
+        )
+
+
 def main() -> None:
     logging.getLogger("httpx").setLevel(logging.WARNING)
-    mcp.run()
+    anyio.run(_serve_stdio)
