@@ -12,7 +12,7 @@ keywords = ["mcp", "tweakers", "vraag-en-aanbod", "second-hand"]
 dependencies = [
     "beautifulsoup4>=4.15.0",
     "httpx>=0.28.1",
-    "mcp>=2.3.0",
+    "mcp>=1.20,<2",
     "pydantic>=2.14.1",
 ]
 

@@ -4,9 +4,9 @@ import logging
 from typing import Annotated
 
 import httpx
-from mcp.server import MCPServer
-from mcp.server.mcpserver.exceptions import ToolError
-from mcp_types import ToolAnnotations
+from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.exceptions import ToolError
+from mcp.types import ToolAnnotations
 from pydantic import Field
 
 from tweakers_aanbod_mcp.client import RateLimitedError, TweakersClient
@@ -14,7 +14,7 @@ from tweakers_aanbod_mcp.models import Category, Listing, SearchResult
 from tweakers_aanbod_mcp.parsing import ParseError, parse_categories, parse_listing, parse_search_page
 from tweakers_aanbod_mcp.query import Condition, SellerType, Sort, search_params
 
-mcp = MCPServer(
+mcp = FastMCP(
     "tweakers-aanbod",
     instructions=(
         "Search second-hand listings on Tweakers Vraag & Aanbod (tweakers.net/aanbod). "
