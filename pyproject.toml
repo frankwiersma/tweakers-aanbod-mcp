@@ -1,0 +1,39 @@
+[project]
+name = "tweakers-aanbod-mcp"
+version = "0.1.0"
+description = "MCP server for Tweakers Vraag & Aanbod: search second-hand listings by category, price, condition and distance"
+readme = "README.md"
+authors = [
+    { name = "Frank Wiersma", email = "f.wiersma@live.nl" }
+]
+requires-python = ">=3.11"
+license = "MIT"
+keywords = ["mcp", "tweakers", "vraag-en-aanbod", "second-hand"]
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "httpx>=0.28.1",
+    "mcp>=2.3.0",
+    "pydantic>=2.14.1",
+]
+
+[project.scripts]
+tweakers-aanbod-mcp = "tweakers_aanbod_mcp.server:main"
+
+[project.urls]
+Repository = "https://github.com/frankwiersma/tweakers-aanbod-mcp"
+
+[build-system]
+requires = ["uv_build>=0.13.4,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.17.2",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
